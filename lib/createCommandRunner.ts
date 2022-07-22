@@ -1,7 +1,7 @@
 import { createQueue } from '@arpinum/promising';
 import * as debugLib from 'debug';
 import * as _ from 'lodash';
-import { Observable, Subject, throwError } from 'rxjs';
+import { lastValueFrom, Observable, Subject, throwError } from 'rxjs';
 import {
   catchError,
   filter,
@@ -94,7 +94,7 @@ export function createCommandRunner(
     });
 
     function waitAnswer() {
-      return commandAnswer$()
+      return lastValueFrom(commandAnswer$()
         .pipe(
           timeout(answerTimeoutMS),
           catchError(({ message }) =>
@@ -104,8 +104,7 @@ export function createCommandRunner(
               )
             )
           )
-        )
-        .toPromise();
+        ));
 
       function commandAnswer$() {
         return answer$.pipe(publish(), refCount(), first());
